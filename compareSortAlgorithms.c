@@ -1,7 +1,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+
 int extraMemoryAllocated;
 
 // implement merge sort
@@ -11,8 +11,9 @@ void merge(int pData[], int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
 
-    int L[n1], R[n2];
-
+    int *L = (int*) malloc(n1*sizeof(int));
+    int *R = (int*) malloc(n2*sizeof(int));
+    extraMemoryAllocated += n1 * sizeof(int) + n2 * sizeof(int);
     for (i = 0; i < n1; i++)
         L[i] = pData[l + i];
     for (j = 0; j < n2; j++)
@@ -44,11 +45,13 @@ void merge(int pData[], int l, int m, int r) {
         j++;
         k++;
     }
+  free(L);
+  free(R);
 }
 
 void mergeSort(int pData[], int l, int r) {
     if (l < r) {
-        int m = l + (r - l) / 2;
+        int m = (l+r)/2;
         mergeSort(pData, l, m);
         mergeSort(pData, m + 1, r);
         merge(pData, l, m, r);
@@ -67,7 +70,7 @@ void insertionSort(int* pData, int n)
         item = pData[i];
  
         for (j = i - 1 ; j >= 0; j--) {
-		if (pData[j]>item)
+		      if (pData[j]>item)
             	    pData[j + 1] = pData[j];
            	else
 			break;
@@ -80,29 +83,34 @@ void insertionSort(int* pData, int n)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void bubbleSort(int* pData, int n)
 {
-	int i, j;
+	int i, j, temp;
     for (i = 0; i < n - 1; i++)
+      {
         for (j = 0; j < n - i - 1; j++)
+        {
             if (pData[j] > pData[j + 1]) {
-                int temp = pData[j];
+                temp = pData[j];
                 pData[j] = pData[j + 1];
                 pData[j + 1] = temp;
             }
+        }
+      }
 }
 
 // implement selection sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void selectionSort(int* pData, int n)
 {
-	 int i, j, min_idx;
-    for (i = 0; i < n - 1; i++) {
+	 int i, j, min_idx, temp;
+    for (i = 0; i < n - 1; i++) 
+    {
         min_idx = i;
         for (j = i + 1; j < n; j++)
             if (pData[j] < pData[min_idx])
                 min_idx = j;
-        int temp = pData[min_idx];
-        pData[min_idx] = pData[i];
-        pData[i] = temp;
+        temp = pData[i];
+        pData[i] = pData[min_idx];
+        pData[min_idx] = temp;
     }
 }
 
@@ -124,6 +132,7 @@ int parseData(char *inputFileName, int **ppData)
 	}
 	fclose(inFile);
 	return dataSz;
+}
 }
 
 // prints first and last 100 items in the data array
