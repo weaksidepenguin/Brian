@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+
+
+struct Trie {
+    struct Trie* children[26];
+    int count;
+};
+
+void insert(struct Trie** ppTrie, char* word) {
+    struct Trie* pTrie = *ppTrie;
+    if (pTrie == NULL) {
+        pTrie = (struct Trie*) malloc(sizeof(struct Trie));
+        for (int i = 0; i < 26; i++) {
+            pTrie->children[i] = NULL;
+        }
+        pTrie->count = 0;
+        *ppTrie = pTrie;
+    }
+    for (int i = 0; i < strlen(word); i++) {
+        int index = word[i] - 'a';
+        if (pTrie->children[index] == NULL) {
+            pTrie->children[index] = (struct Trie*) malloc(sizeof(struct Trie));
+            for (int i = 0; i < 26; i++) {
+                pTrie->children[index]->children[i] = NULL;
+            }
+            pTrie->children[index]->count = 0;
+        }
+        pTrie = pTrie->children[index];
+    }
+    pTrie->count++;
+}
+
+int numberOfOccurrences(struct Trie* pTrie, char* word) {
+    if (pTrie == NULL) {
+        return 0;
+    }
+    for (int i = 0; i < strlen(word); i++) {
+        int index = word[i] - 'a';
+        if (pTrie->children[index] == NULL) {
+            return 0;
+        }
+        pTrie = pTrie->children[index];
+    }
+    return pTrie->count;
+}
+
+struct Trie* deallocateTrie(struct Trie* pTrie) {
+    if (pTrie == NULL) {
+        return NULL;
+    }
+    for (int i = 0; i < 26; i++) {
+        pTrie->children[i] = deallocateTrie(pTrie->children[i]);
+    }
+    free(pTrie);
+    return NULL;
+}
+
+int main(void) {
+    struct Trie* trie = NULL;
+
+    // read the number of words in the dictionary
+    int numWords;
+    scanf("%d", &numWords);
+
+    // parse line by line, and insert each word to the trie data structure
+    for (int i = 0; i < numWords; i++) {
+        char word[100];
+        scanf("%s", word);
+        insert(&trie, word);
+    }
+
+    // test the trie with sample words
+    char* pWords[] = {"notaword", "ucf", "no", "note", "corg"};
+    for (int i = 0; i < 5; i++) {
+        printf("\t%s : %d\n", pWords[i], numberOfOccurrences(trie, pWords[i]));
+    }
+
+    // deallocate the trie
+    trie = deallocateTrie(trie);
+    if (trie != NULL) {
+        printf("There is an error in this program\n");
+    }
+
+    return 0;
+}
